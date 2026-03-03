@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'chat-service/**'
+      - '.github/workflows/chat.yaml'
   workflow_dispatch:
 
 jobs:
