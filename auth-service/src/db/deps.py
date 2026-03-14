@@ -1,6 +1,3 @@
-from collections.abc import AsyncGenerator
-
-import fastapi
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.session import AsyncSessionLocal

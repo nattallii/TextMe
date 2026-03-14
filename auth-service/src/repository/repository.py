@@ -21,7 +21,7 @@ class UserRepository:
         return result.scalar_one_or_none() is not None
 
     async def create(self, username: str, hashed_password: str, phone: str) -> User:
-        user = User(username=username, hashed_password=hashed_password, phone=phone)
+        user = User(username=username, hashed_password=hashed_password, phone=phone, is_active=True)
         self.db.add(user)
         await self.db.flush()
         return user

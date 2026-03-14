@@ -21,8 +21,8 @@ class UserService:
         )
 
         return TokenResponse(
-            access_token=create_access_token({'sub': str(user.id)}),
-            refresh_token=create_refresh_token({'sub': str(user.id)})
+            access_token=create_access_token(user.id),
+            refresh_token=create_refresh_token(user.id)
         )
 
     async def login(self, data: UserLogin) -> TokenResponse:
@@ -37,6 +37,3 @@ class UserService:
             access_token=create_access_token(user.id),
             refresh_token=create_refresh_token(user.id)
         )
-
-
-

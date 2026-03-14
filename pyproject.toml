@@ -12,4 +12,5 @@ dependencies = [
 members = [
     "chat-service",
     "auth-service",
+    "profile-service",
 ]

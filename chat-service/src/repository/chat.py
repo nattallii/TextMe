@@ -16,5 +16,5 @@ class ChatRepository:
     async def get_by_members(self, user1: int, user2: int) -> Chat | None:
         return await Chat.find_one({"members": {"$all": [user1, user2]}})
 
-    async def get_user_chats(self, user_id: int) -> list[Chat | None]:
+    async def get_user_chats(self, user_id: int) -> list[Chat]:
         return await Chat.find({"members": user_id}).to_list()

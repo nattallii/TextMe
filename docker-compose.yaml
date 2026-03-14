@@ -15,6 +15,22 @@ services:
       timeout: 5s
       retries: 5
 
+  profile_db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: profileDB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - profile_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d profileDB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   chat_db:
     image: mongo:7
     ports:
@@ -58,8 +74,26 @@ services:
       - ./chat-service:/app
     command: >
       sh -c "set -e;
+      exec python -m uvicorn src.main:app --host 0.0.0.0 --port 8000"
+
+  profile:
+    build:
+      context: ./profile-service
+    ports:
+      - "8002:8000"
+    env_file:
+      - ./profile-service/.env
+    depends_on:
+      profile_db:
+        condition: service_healthy
+    volumes:
+      - ./profile-service:/app
+    command: >
+      sh -c "set -e;
+      uv run alembic upgrade head;
       exec uv run uvicorn src.main:app --host 0.0.0.0 --port 8000"
 
 volumes:
   auth_db_data:
+  profile_db_data:
   chat_db_data:
