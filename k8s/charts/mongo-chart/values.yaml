@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: mongo
+  tag: "7"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 27017
+
+mongo:
+  user: root
+  password: password
+  db: chatDB
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 1Gi

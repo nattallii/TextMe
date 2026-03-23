@@ -54,7 +54,7 @@ services:
       auth_db:
         condition: service_healthy
     volumes:
-      - ./auth-service:/app
+      - ./app-chart:/app
     command: >
       sh -c "set -e;
       uv run alembic upgrade head;

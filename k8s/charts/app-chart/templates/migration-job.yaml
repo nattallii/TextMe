@@ -1,0 +1,29 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "app-chart.fullname" . }}-migration
+#  annotations:
+#    "helm.sh/hook": pre-upgrade
+#    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command: ["uv", "run", "alembic", "upgrade", "head"]
+
+          env:
+            - name: DATABASE_URL
+              value: {{ .Values.secret.DATABASE_URL | quote }}
+            - name: JWT_SECRET_KEY
+              value: {{ .Values.secret.JWT_SECRET_KEY | quote }}
+            - name: JWT_ALGORITHM
+              value: {{ .Values.config.JWT_ALGORITHM | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.LOG_LEVEL | quote }}
+{{- end }}

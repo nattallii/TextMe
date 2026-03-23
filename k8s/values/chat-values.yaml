@@ -1,0 +1,33 @@
+replicaCount: 3
+
+image:
+  repository: natalii571/chat-service
+  tag: latest
+
+service:
+  port: 8001
+  targetPort: 8000
+
+config:
+  LOG_LEVEL: info
+  JWT_ALGORITHM: HS256
+  MONGO_DB: chatDB
+
+secret:
+  MONGO_URL: mongodb://root:password@chat-mongo-chart:27017/chatDB?authSource=admin
+  JWT_SECRET_KEY: SUPER_PUPER_SECRET
+
+database:
+  postgres:
+    enabled: false
+  mongo:
+    enabled: true
+
+mongo-chart:
+  name: chat-db
+  database: chatDB
+  port: 27017
+
+
+migration:
+  enabled: false

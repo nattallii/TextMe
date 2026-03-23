@@ -1,0 +1,33 @@
+replicaCount: 3
+
+image:
+  repository: natalii571/textme-profile-service
+  tag: latest
+
+service:
+  port: 8002
+  targetPort: 8000
+
+config:
+  LOG_LEVEL: info
+  JWT_ALGORITHM: HS256
+
+secret:
+  DATABASE_URL: postgresql+asyncpg://postgres:password@profile-postgres-chart:5432/profileDB
+  JWT_SECRET_KEY: SUPER_PUPER_SECRET
+
+
+database:
+  postgres:
+    enabled: true
+  mongo:
+    enabled: false
+
+migration:
+  enabled: true
+
+postgres-chart:
+  postgres:
+    user: postgres
+    password: password
+    db: profileDB

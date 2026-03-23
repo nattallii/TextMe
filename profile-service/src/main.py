@@ -7,7 +7,12 @@ app = FastAPI(title="Profile Service", description="Profile Service", root_path=
 app.include_router(v1_router, prefix="/api/v1")
 
 
-@app.get("/health")
-def health():
+@app.get("/health/ready")
+def ready():
+    return {"status": "ready"}
+
+
+@app.get("/health/live")
+def live():
     return {"status": "ok"}
 

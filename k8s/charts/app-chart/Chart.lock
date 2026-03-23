@@ -1,0 +1,9 @@
+dependencies:
+- name: postgres-chart
+  repository: file://../postgres-chart
+  version: 1.0.0
+- name: mongo-chart
+  repository: file://../mongo-chart
+  version: 1.0.0
+digest: sha256:7cef56510862fdc26f85e0f2c3062fa295c793c4258d1e9d3a412ce3ee9a5361
+generated: "2026-03-19T19:08:50.0385381+02:00"
