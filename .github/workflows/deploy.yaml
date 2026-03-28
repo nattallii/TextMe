@@ -51,4 +51,4 @@ jobs:
         run: kubectl create namespace textme --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy with Helmfile
-        run: helmfile apply
+        run: helmfile -f ./k8s/helmfile.yaml apply
