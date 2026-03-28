@@ -43,14 +43,16 @@ jobs:
 
       - name: Install Helmfile
         run: |
-          HELMFILE_VERSION=0.168.0
-          curl -L "https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_linux_amd64.tar.gz" -o helmfile.tar.gz
+          curl -L https://github.com/helmfile/helmfile/releases/download/v0.168.0/helmfile_0.168.0_linux_amd64.tar.gz -o helmfile.tar.gz
           tar -xzf helmfile.tar.gz
-          sudo mv helmfile /usr/local/bin/helmfile
+          sudo mv helmfile /usr/local/bin/
           helmfile --version
 
-      - name: Create namespace if missing
-        run: kubectl create namespace textme --dry-run=client -o yaml | kubectl apply -f -
+      - name: Install Helm diff plugin
+        run: |
+          helm plugin list
+          helm plugin install https://github.com/databus23/helm-diff || true
+          helm plugin list
 
-      - name: Deploy with Helmfile
+      - name: Deploy
         run: helmfile -f ./k8s/helmfile.yaml apply
