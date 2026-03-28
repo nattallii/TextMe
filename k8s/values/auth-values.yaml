@@ -23,6 +23,10 @@ secret:
 database:
   postgres:
     enabled: true
+    persistence:
+      enabled: true
+      storageClass: gp2
+      size: 1Gi
   mongo:
     enabled: false
 

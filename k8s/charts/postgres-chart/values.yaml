@@ -9,12 +9,8 @@ service:
   type: ClusterIP
   port: 5432
 
-#postgres:
-#  user: postgres
-#  password: password
-#  db: authDB
 
 persistence:
   enabled: true
-  accessMode: ReadWriteOnce
+  storageClass: gp2
   size: 1Gi

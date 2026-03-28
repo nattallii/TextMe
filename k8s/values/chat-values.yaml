@@ -23,6 +23,10 @@ database:
     enabled: false
   mongo:
     enabled: true
+    persistence:
+      enabled: true
+      storageClass: gp2
+      size: 1Gi
 
 mongo-chart:
   name: chat-db
