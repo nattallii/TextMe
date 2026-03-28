@@ -1,0 +1,18 @@
+releases:
+  - name: auth
+    namespace: textme
+    chart: ./charts/app-chart
+    values:
+      - ./values/auth-values.yaml
+
+  - name: chat
+    namespace: textme
+    chart: ./charts/app-chart
+    values:
+      - ./values/chat-values.yaml
+
+  - name: profile
+    namespace: textme
+    chart: ./charts/app-chart
+    values:
+      - ./values/profile-values.yaml

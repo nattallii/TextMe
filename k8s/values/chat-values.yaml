@@ -1,11 +1,12 @@
-replicaCount: 3
+replicaCount: 1
 
 image:
   repository: natalii571/chat-service
   tag: latest
 
 service:
-  port: 8001
+  type: ClusterIP
+  port: 8000
   targetPort: 8000
 
 config:
@@ -31,3 +32,10 @@ mongo-chart:
 
 migration:
   enabled: false
+
+ingress:
+  enabled: true
+  paths:
+    - path: /chat
+      pathType: Prefix
+      servicePort: 8000

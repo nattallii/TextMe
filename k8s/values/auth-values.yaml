@@ -1,10 +1,11 @@
-replicaCount: 3
+replicaCount: 1
 
 image:
   repository: natalii571/auth-service
   tag: latest
 
 service:
+  type: ClusterIP
   port: 8000
   targetPort: 8000
 
@@ -34,3 +35,11 @@ postgres-chart:
     user: postgres
     password: password
     db: authDB
+
+
+ingress:
+  enabled: true
+  paths:
+    - path: /auth(/|$)(.*)
+      pathType: ImplementationSpecific
+      servicePort: 8000
