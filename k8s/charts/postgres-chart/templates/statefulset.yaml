@@ -35,6 +35,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "postgres-chart.fullname" . }}-secret
                   key: POSTGRES_DB
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
