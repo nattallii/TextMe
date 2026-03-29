@@ -18,20 +18,23 @@ secret:
   MONGO_URL: mongodb://root:password@chat-mongo-chart:27017/chatDB?authSource=admin
   JWT_SECRET_KEY: SUPER_PUPER_SECRET
 
+
 database:
   postgres:
     enabled: false
   mongo:
     enabled: true
-    persistence:
-      enabled: true
-      storageClass: gp2
-      size: 1Gi
 
 mongo-chart:
-  name: chat-db
-  database: chatDB
-  port: 27017
+  secret:
+    MONGO_INITDB_ROOT_USERNAME: root
+    MONGO_INITDB_ROOT_PASSWORD: password
+    MONGO_INITDB_DATABASE: chatDB
+
+  persistence:
+    accessMode: ReadWriteOnce
+    storageClass: gp2
+    size: 1Gi
 
 
 migration:

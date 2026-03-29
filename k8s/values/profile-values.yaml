@@ -17,25 +17,26 @@ secret:
   DATABASE_URL: postgresql+asyncpg://postgres:password@profile-postgres-chart:5432/profileDB
   JWT_SECRET_KEY: SUPER_PUPER_SECRET
 
-
 database:
   postgres:
     enabled: true
-    persistence:
-      enabled: true
-      storageClass: gp2
-      size: 1Gi
   mongo:
     enabled: false
+
+postgres-chart:
+  secret:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    POSTGRES_DB: profileDB
+
+  persistence:
+    accessMode: ReadWriteOnce
+    storageClass: gp2
+    size: 1Gi
 
 migration:
   enabled: true
 
-postgres-chart:
-  postgres:
-    user: postgres
-    password: password
-    db: profileDB
 
 
 ingress:

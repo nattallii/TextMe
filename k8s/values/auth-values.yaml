@@ -23,22 +23,29 @@ secret:
 database:
   postgres:
     enabled: true
-    persistence:
-      enabled: true
-      storageClass: gp2
-      size: 1Gi
   mongo:
     enabled: false
+
+postgres-chart:
+  secret:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    POSTGRES_DB: authDB
+
+  persistence:
+    accessMode: ReadWriteOnce
+    storageClass: gp2
+    size: 1Gi
 
 migration:
   enabled: true
 
 
-postgres-chart:
-  postgres:
-    user: postgres
-    password: password
-    db: authDB
+#postgres-chart:
+#  postgres:
+#    user: postgres
+#    password: password
+#    db: authDB
 
 
 ingress:
