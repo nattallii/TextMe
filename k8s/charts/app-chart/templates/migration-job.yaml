@@ -3,9 +3,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "app-chart.fullname" . }}-migration
-#  annotations:
-#    "helm.sh/hook": pre-upgrade
-#    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 3
   template:
@@ -15,8 +12,16 @@ spec:
         - name: migration
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: IfNotPresent
-          command: ["uv", "run", "alembic", "upgrade", "head"]
-
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "Waiting for database..."
+              until python -c "import socket; s=socket.socket(); s.settimeout(2); s.connect(('{{ .Release.Name }}-postgres-chart', 5432)); s.close()"; do
+                echo "Database is not ready yet..."
+                sleep 2
+              done
+              echo "Database is ready"
+              uv run alembic upgrade head
           env:
             - name: DATABASE_URL
               value: {{ .Values.secret.DATABASE_URL | quote }}

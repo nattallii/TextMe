@@ -41,13 +41,6 @@ migration:
   enabled: true
 
 
-#postgres-chart:
-#  postgres:
-#    user: postgres
-#    password: password
-#    db: authDB
-
-
 ingress:
   enabled: true
   paths:

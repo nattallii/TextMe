@@ -43,5 +43,5 @@ ingress:
   enabled: true
   paths:
     - path: /profile(/|$)(.*)
-      pathType: Prefix
+      pathType: ImplementationSpecific
       servicePort: 8000

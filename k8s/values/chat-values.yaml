@@ -1,8 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: natalii571/chat-service
+  repository: natalii571/textme-chat-service
   tag: latest
+  imagePullPolicy: Always
 
 service:
   type: ClusterIP
@@ -43,6 +44,6 @@ migration:
 ingress:
   enabled: true
   paths:
-    - path: /chat
-      pathType: Prefix
+    - path: /chat(/|$)(.*)
+      pathType: ImplementationSpecific
       servicePort: 8000

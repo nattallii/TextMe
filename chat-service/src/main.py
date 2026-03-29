@@ -10,8 +10,15 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
-app.include_router(chat_router)
+app = FastAPI(
+    lifespan=lifespan,
+    title="Chat Service",
+    description="Chat Service",
+    root_path="/chat",
+    docs_url="/docs",
+    openapi_url="/openapi.json",
+)
+app.include_router(chat_router, prefix="/api/v1")
 
 @app.get("/health/ready")
 def ready():
