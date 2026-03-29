@@ -9,6 +9,10 @@ service:
   type: ClusterIP
   port: 5432
 
+postgres:
+  user: postgres
+  password: password
+  db: appdb
 
 persistence:
   enabled: true

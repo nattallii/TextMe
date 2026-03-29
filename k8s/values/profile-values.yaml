@@ -24,10 +24,10 @@ database:
     enabled: false
 
 postgres-chart:
-  secret:
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: password
-    POSTGRES_DB: profileDB
+  postgres:
+    user: postgres
+    password: password
+    db: profileDB
 
   persistence:
     accessMode: ReadWriteOnce
@@ -42,6 +42,6 @@ migration:
 ingress:
   enabled: true
   paths:
-    - path: /profile
+    - path: /profile(/|$)(.*)
       pathType: Prefix
       servicePort: 8000

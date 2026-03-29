@@ -27,10 +27,10 @@ database:
     enabled: false
 
 postgres-chart:
-  secret:
-    POSTGRES_USER: postgres
-    POSTGRES_PASSWORD: password
-    POSTGRES_DB: authDB
+  postgres:
+    user: postgres
+    password: password
+    db: authDB
 
   persistence:
     accessMode: ReadWriteOnce
