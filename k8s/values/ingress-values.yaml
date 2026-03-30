@@ -1,0 +1,21 @@
+ingress:
+  enabled: true
+  name: textme-alb
+  scheme: internet-facing
+  targetType: ip
+  listenPorts: '[{"HTTP":80}]'
+  paths:
+    - path: /auth
+      pathType: Prefix
+      serviceName: auth-app-chart
+      servicePort: 8000
+
+    - path: /profile
+      pathType: Prefix
+      serviceName: profile-app-chart
+      servicePort: 8000
+
+    - path: /chat
+      pathType: Prefix
+      serviceName: chat-app-chart
+      servicePort: 8000

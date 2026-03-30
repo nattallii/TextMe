@@ -16,3 +16,9 @@ releases:
     chart: ./charts/app-chart
     values:
       - ./values/profile-values.yaml
+
+  - name: ingress
+    namespace: textme
+    chart: ./charts/ingress-chart
+    values:
+      - ./values/ingress-values.yaml
