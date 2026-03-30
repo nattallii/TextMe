@@ -5,7 +5,7 @@ from src.schemas.schemas import UserLogin, UserCreate, TokenResponse
 from src.services.services import UserService
 from src.db.deps import get_db
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(tags=["auth"])
 
 
 @router.post("/register", response_model=TokenResponse, status_code=201)

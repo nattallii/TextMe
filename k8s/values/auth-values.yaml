@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: natalii571/auth-service
+  repository: natalii571/textme-auth-service
   tag: latest
 
 service:
