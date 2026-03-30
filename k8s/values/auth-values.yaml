@@ -2,7 +2,8 @@ replicaCount: 1
 
 image:
   repository: natalii571/textme-auth-service
-  tag: latest
+  tag: auth-fix-1
+  imagePullPolicy: Always
 
 service:
   type: ClusterIP
