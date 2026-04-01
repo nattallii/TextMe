@@ -14,13 +14,13 @@ jobs:
         service:
           - name: auth
             context: ./auth-service
-            image: natalii571/auth-service
+            image: natalii571/textme-auth-service
           - name: profile
             context: ./profile-service
             image: natalii571/textme-profile-service
           - name: chat
             context: ./chat-service
-            image: natalii571/chat-service
+            image: natalii571/textme-chat-service
 
     steps:
       - name: Checkout code
