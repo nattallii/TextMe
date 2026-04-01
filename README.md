@@ -1,9 +1,16 @@
 # TextMe
-TaskBoardApp is a microservices-based backend application built with FastAPI.
+TextMe is a microservices-based backend application built with FastAPI.
 The system is designed as a set of independent services responsible for authentication, user profiles, chats and real-time messages.
 
-## Tech Stack
+## Quick navigation
+- [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
+- [Useful Links](#useful-links)
+- [How to Start the Project](#how-to-start-the-project)
+- [Public API Endpoints (AWS EKS)](#public-api-endpoints-aws-eks)
+- [Deployment Overview](#deployment-overview)
 
+## Tech Stack
 ### Backend
 
 **FastAPI**  
@@ -136,6 +143,7 @@ Contributors should follow the [Conventional Commits](https://www.conventionalco
 docker version
 docker compose version
 ```
+
 ### Start the Application:
 1. From the project **root** (where docker-compose.yml is):
 
@@ -199,4 +207,115 @@ SELECT * FROM users;
 ### Stop Containers
 ```
 docker compose down
+```
+
+## Public API Endpoints (AWS EKS)
+
+The application is deployed on Amazon EKS and exposed via an AWS Application Load Balancer (ALB).
+
+You can access the services using the following URLs:
+
+- **Auth Service (Swagger UI):**  
+  http://k8s-textme-textmeal-ab3a253012-1439487044.eu-central-1.elb.amazonaws.com/auth/docs
+
+- **Profile Service (Swagger UI):**  
+  http://k8s-textme-textmeal-ab3a253012-1439487044.eu-central-1.elb.amazonaws.com/profile/docs
+
+- **Chat Service (Swagger UI):**  
+  http://k8s-textme-textmeal-ab3a253012-1439487044.eu-central-1.elb.amazonaws.com/chat/docs
+
+All services are routed through a single AWS Application Load Balancer using path-based routing via Kubernetes Ingress.
+
+
+## Deployment Overview
+
+The application is deployed to AWS EKS using a full CI/CD pipeline and Kubernetes-based infrastructure.
+
+### 1. Containerization
+
+Each microservice (`auth`, `chat`, `profile`) is containerized using Docker.
+
+Images are built and pushed to Docker Hub:
+- natalii571/textme-auth-service
+- natalii571/textme-chat-service
+- natalii571/textme-profile-service
+
+---
+
+### 2. CI/CD Pipeline
+
+GitHub Actions is used for automation:
+
+- **CI (Build & Push):**
+  - Builds Docker images for all services
+  - Pushes images to Docker Hub
+
+- **CD (Deploy):**
+  - Authenticates to AWS using OIDC
+  - Updates kubeconfig for EKS
+  - Deploys application using Helmfile
+
+---
+
+### 3. Kubernetes Deployment
+
+The application is deployed using Helm and Helmfile:
+
+- A reusable `app-chart` is used for all services
+- Each service has its own `values.yaml`
+- Databases are deployed as subcharts:
+  - PostgreSQL (for auth & profile)
+  - MongoDB (for chat)
+
+---
+
+### 4. Persistent Storage
+
+- AWS EBS volumes are used for persistent storage
+- Provisioned dynamically via **EBS CSI Driver**
+- PVCs are created for each database
+
+---
+
+### 5. AWS Infrastructure Setup
+
+The following AWS components were configured:
+
+- **Amazon EKS cluster** (via eksctl)
+- **IAM roles and OIDC provider** for secure access
+- **EBS CSI Driver** for persistent volumes
+- **AWS Load Balancer Controller** for Ingress
+
+---
+
+### 6. Ingress & Load Balancing
+
+- Kubernetes Ingress is used for routing
+- AWS Load Balancer Controller creates an **Application Load Balancer (ALB)**
+- Path-based routing is configured:
+
+  - `/auth` → auth service  
+  - `/chat` → chat service  
+  - `/profile` → profile service  
+
+---
+
+## Commands used for deployment
+
+```
+aws eks describe-cluster --name textme-cluster --region eu-central-1 --query "cluster.resourcesVpcConfig.vpcId" --output text
+
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+
+curl -Lo iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.14.1/docs/install/iam_policy.json
+aws iam create-policy --policy-name AWSLoadBalancerControllerIAMPolicy --policy-document file://iam_policy.json
+
+eksctl create iamserviceaccount --cluster=textme-cluster --namespace=kube-system --name=aws-load-balancer-controller --attach-policy-arn=arn:aws:iam::585534523982:policy/AWSLoadBalancerControllerIAMPolicy --override-existing-serviceaccounts --approve --region=eu-central-1
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=textme-cluster --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller --set region=eu-central-1 --set vpcId=ТУТ_ТВІЙ_VPC_ID
+
+kubectl get deployment -n kube-system aws-load-balancer-controller
+helmfile -f ./k8s/helmfile.yaml apply
+kubectl get ingress -n textme
 ```
