@@ -1,0 +1,22 @@
+[project]
+name = "auth-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aio-pika>=9.6.2",
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.133.1",
+    "fastapi-mail>=1.6.2",
+    "passlib>=1.7.4",
+    "psycopg[binary]>=3.3.3",
+    "pwdlib[argon2]>=0.3.0",
+    "pydantic-settings>=2.13.1",
+    "pydantic[email]>=2.12.5",
+    "pyjwt>=2.11.0",
+    "python-jose>=3.5.0",
+    "sqlalchemy[asyncio]>=2.0.47",
+    "uvicorn>=0.41.0",
+]

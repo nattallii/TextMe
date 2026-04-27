@@ -45,16 +45,16 @@ services:
 
   auth:
     build:
-      context: ./auth-service
+      context: ./services/auth-service
     ports:
       - "8000:8000"
     env_file:
-      - ./auth-service/.env
+      - ./services/auth-service/.env
     depends_on:
       auth_db:
         condition: service_healthy
     volumes:
-      - ./app-chart:/app
+      - ./services/auth-service:/app
     command: >
       sh -c "set -e;
       uv run alembic upgrade head;
@@ -62,36 +62,47 @@ services:
 
   chat:
     build:
-      context: ./chat-service
+      context: ./services/chat-service
     ports:
       - "8001:8000"
     env_file:
-      - ./chat-service/.env
+      - ./services/chat-service/.env
     depends_on:
       chat_db:
         condition: service_healthy
     volumes:
-      - ./chat-service:/app
+      - ./services/chat-service:/app
     command: >
       sh -c "set -e;
       exec python -m uvicorn src.main:app --host 0.0.0.0 --port 8000"
 
   profile:
     build:
-      context: ./profile-service
+      context: ./services/profile-service
     ports:
       - "8002:8000"
     env_file:
-      - ./profile-service/.env
+      - ./services/profile-service/.env
     depends_on:
       profile_db:
         condition: service_healthy
     volumes:
-      - ./profile-service:/app
+      - ./services/profile-service:/app
     command: >
       sh -c "set -e;
       uv run alembic upgrade head;
       exec uv run uvicorn src.main:app --host 0.0.0.0 --port 8000"
+
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
 
 volumes:
   auth_db_data:
