@@ -18,12 +18,17 @@ class CreateChat(BaseModel):
     def validate_chat(self):
         if self.type == ChatType.PRIVATE and len(self.member_ids) != 1:
             raise ValueError("Private chat must have exactly 1 other user")
-
         if self.type == ChatType.GROUP and len(self.member_ids) < 2:
             raise ValueError("Group chat must have at least 2 members")
-
         return self
 
+
+class MemberInfo(BaseModel):
+    """Basic public info about a chat member, fetched from the profile service."""
+    id: int
+    username: Optional[str] = None
+    phone: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 class ChatOut(BaseModel):
@@ -31,13 +36,14 @@ class ChatOut(BaseModel):
     type: ChatType
     members: list[int]
     name: Optional[str] = None
-
     last_message: Optional[str] = None
     last_message_at: Optional[datetime] = None
-
+    is_deleted: bool
     created_by: int
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
 
 
 class AddMembersSchema(BaseModel):
@@ -48,9 +54,12 @@ class RemoveMemberSchema(BaseModel):
     user_id: int
 
 
-
 class ChatWithUnread(ChatOut):
     unread_count: int
+    # Enriched member data — always present, falls back to id-only if profile
+    # service is unavailable. Allows the frontend to show names/avatars even
+    # for users who are not in the viewer's contact list.
+    members_info: list[MemberInfo] = Field(default_factory=list)
 
 
 class UpdatePermissions(BaseModel):

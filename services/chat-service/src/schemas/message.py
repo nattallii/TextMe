@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 
@@ -9,11 +9,24 @@ class MessageCreate(BaseModel):
 
 class MessageOut(BaseModel):
     id: str
+
     chat_id: str
     sender_id: int
-    content: str
-    created_at: datetime
 
+    content: str
+
+    is_deleted: bool
+    is_edited: bool
+
+    created_at: datetime
+    updated_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class MessageUpdate(BaseModel):
+    content: str
+
+    model_config = ConfigDict(extra="forbid")
 
 
 
