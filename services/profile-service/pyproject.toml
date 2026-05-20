@@ -18,4 +18,6 @@ dependencies = [
     "python-jose>=3.5.0",
     "sqlalchemy>=2.0.47",
     "uvicorn>=0.41.0",
+    "boto3>=1.43.4",
+    "python-multipart>=0.0.27",
 ]

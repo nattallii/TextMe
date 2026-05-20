@@ -49,3 +49,12 @@ class ProfileRepository:
     async def delete_profile(self, profile: UserProfile) -> None:
         await self.db.delete(profile)
         await self.db.commit()
+
+    async def update_profile(self, profile: UserProfile, data: dict) -> UserProfile:
+        for key, value in data.items():
+            setattr(profile, key, value)
+
+        await self.db.commit()
+        await self.db.refresh(profile)
+
+        return profile

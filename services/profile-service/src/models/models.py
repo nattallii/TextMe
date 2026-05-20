@@ -13,3 +13,5 @@ class UserProfile(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now() , nullable=False)
 
     user_id: Mapped[int] = mapped_column(unique=True, nullable=False, index=True)
+
+    avatar_url: Mapped[str] = mapped_column(String(255), nullable=True)

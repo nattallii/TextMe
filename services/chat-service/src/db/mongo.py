@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from src.security.config import settings
 from beanie import init_beanie
 from src.models.message import Message
+from src.models.contact import Contact
 from src.models.chat import Chat, ChatPermissionModel, ChatReadState
 
 async def init_db(app: FastAPI):
@@ -15,5 +16,6 @@ async def init_db(app: FastAPI):
             Message,
             ChatPermissionModel,
             ChatReadState,
+            Contact
         ],
     )

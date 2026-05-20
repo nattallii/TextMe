@@ -7,7 +7,10 @@ from datetime import datetime
 class WebSocketMessageType(str, Enum):
     NEW_MESSAGE = "new_message"
     MESSAGE_READ = "message_read"
+    NEW_CHAT = "new_chat"
     MESSAGE_DELETE = "message_delete"
+    MESSAGE_STATUS = "message_status"
+    UNREAD_UPDATE = "unread_update"
     TYPING= "typing"
     USER_JOIN = "user_join"
     USER_LEFT = "user_left"

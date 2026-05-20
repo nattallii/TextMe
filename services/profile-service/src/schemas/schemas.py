@@ -13,7 +13,7 @@ class ProfileCreate(ProfileBase):
     pass
 
 
-class ProfileUpdate(ProfileBase):
+class ProfileUpdate(BaseModel):
     username: Optional[str] = None
     bio: Optional[str] = None
 
@@ -22,5 +22,7 @@ class ProfileUpdate(ProfileBase):
 class ProfileOut(ProfileBase):
     id: int
     user_id: int
+
+    avatar_url: str | None = None
 
     model_config = ConfigDict(from_attributes=True)

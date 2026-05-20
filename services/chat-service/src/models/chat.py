@@ -11,7 +11,9 @@ class ChatType(str, Enum):
 
 
 class Chat(Document):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    model_config = {"populate_by_name": True}
+
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
 
     type: ChatType = ChatType.PRIVATE
     members: list[int] = Field(default_factory=list)
@@ -25,8 +27,11 @@ class Chat(Document):
     last_message: Optional[str] = None
     last_message_at: Optional[datetime] = None
 
+    hidden_for: list[int] = Field(default_factory=list)
+
     class Settings:
         name = "chats"
+        use_revision = False
         indexes = [
             "dm_key",
             "members",
