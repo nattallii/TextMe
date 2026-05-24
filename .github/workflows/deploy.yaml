@@ -1,58 +1,58 @@
-name: Deploy to EKS
-
-on:
-  workflow_run:
-    workflows: ["Build & Push Images"]
-    types:
-      - completed
-  workflow_dispatch:
-
-permissions:
-  id-token: write
-  contents: read
-
-env:
-  AWS_REGION: eu-central-1
-  EKS_CLUSTER_NAME: textme-cluster
-
-jobs:
-  deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Update kubeconfig
-        run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
-
-      - name: Check cluster access
-        run: kubectl get nodes
-
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.18.4
-
-      - name: Install Helmfile
-        run: |
-          curl -L https://github.com/helmfile/helmfile/releases/download/v0.168.0/helmfile_0.168.0_linux_amd64.tar.gz -o helmfile.tar.gz
-          tar -xzf helmfile.tar.gz
-          sudo mv helmfile /usr/local/bin/
-          helmfile --version
-
-      - name: Install Helm diff plugin
-        run: |
-          helm plugin list
-          helm plugin install https://github.com/databus23/helm-diff || true
-          helm plugin list
-
-      - name: Deploy
-        run: helmfile -f ./k8s/helmfile.yaml apply
+#name: Deploy to EKS
+#
+#on:
+#  workflow_run:
+#    workflows: ["Build & Push Images"]
+#    types:
+#      - completed
+#  workflow_dispatch:
+#
+#permissions:
+#  id-token: write
+#  contents: read
+#
+#env:
+#  AWS_REGION: eu-central-1
+#  EKS_CLUSTER_NAME: textme-cluster
+#
+#jobs:
+#  deploy:
+#    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+#          aws-region: ${{ env.AWS_REGION }}
+#
+#      - name: Update kubeconfig
+#        run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+#
+#      - name: Check cluster access
+#        run: kubectl get nodes
+#
+#      - name: Install Helm
+#        uses: azure/setup-helm@v4
+#        with:
+#          version: v3.18.4
+#
+#      - name: Install Helmfile
+#        run: |
+#          curl -L https://github.com/helmfile/helmfile/releases/download/v0.168.0/helmfile_0.168.0_linux_amd64.tar.gz -o helmfile.tar.gz
+#          tar -xzf helmfile.tar.gz
+#          sudo mv helmfile /usr/local/bin/
+#          helmfile --version
+#
+#      - name: Install Helm diff plugin
+#        run: |
+#          helm plugin list
+#          helm plugin install https://github.com/databus23/helm-diff || true
+#          helm plugin list
+#
+#      - name: Deploy
+#        run: helmfile -f ./k8s/helmfile.yaml apply

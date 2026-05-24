@@ -3,7 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from src.db.mongo import init_db
 from src.api.v1.chat import router as chat_router
+from src.api.v1.upload import router as upload_router
 from src.api.v1.ws import router as ws_router
+from src.api.v1.ai import router as ai_router
 from src.api.v1.ws_users import router as ws_users_router
 from src.api.v1.contacts import router as contacts_router
 from src.redis.listener import redis_listener
@@ -64,7 +66,9 @@ app.add_middleware(
 )
 
 app.include_router(chat_router, prefix="/api/v1")
+app.include_router(upload_router, prefix="/api/v1")
 app.include_router(contacts_router, prefix="/api/v1")
+app.include_router(ai_router, prefix="/api/v1")
 app.include_router(ws_router)
 app.include_router(ws_users_router)
 

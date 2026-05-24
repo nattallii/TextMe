@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File
 from src.db.deps import get_current_user_id
 from src.services.chat import ChatService
 from src.schemas.chat import CreateChat, ChatOut, ChatWithUnread
@@ -94,3 +94,9 @@ async def delete_chat(
         service: ChatService = Depends(get_chat_service)
 ):
     return await service.delete_chat(chat_id, user_id)
+
+
+
+
+
+

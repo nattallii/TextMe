@@ -15,12 +15,19 @@ from src.ws.schemas import (
 
 class ConnectionManager:
     def __init__(self):
+        # chat_id -> set of WebSockets subscribed to that chat room
         self.connections: dict[str, set[WebSocket]] = defaultdict(set)
+        # user_id -> set of WebSockets for that user (chat WS + global user WS)
         self.user_connections: dict[int, set[WebSocket]] = defaultdict(set)
+        # user_id -> set of chat_ids they are members of (for status broadcasting)
+        self.user_chats: dict[int, set[str]] = defaultdict(set)
+
+    # ── connect / disconnect ──────────────────────────────────────────────────
 
     async def connect(self, ws: WebSocket, chat_id: str, user_id: int):
         self.connections[chat_id].add(ws)
         self.user_connections[user_id].add(ws)
+        self.user_chats[user_id].add(chat_id)
         print(f"[connect] chat={chat_id} user={user_id} | user_connections keys={list(self.user_connections.keys())}")
 
     async def connect_user(self, ws: WebSocket, user_id: int):
@@ -34,6 +41,7 @@ class ConnectionManager:
         self.user_connections[user_id].discard(ws)
         if not self.user_connections[user_id]:
             del self.user_connections[user_id]
+        self.user_chats[user_id].discard(chat_id)
         print(f"[disconnect] chat={chat_id} user={user_id}")
 
     async def disconnect_user(self, ws: WebSocket, user_id: int):
@@ -42,7 +50,10 @@ class ConnectionManager:
             del self.user_connections[user_id]
         print(f"[disconnect_user] user={user_id}")
 
+    # ── low-level senders ─────────────────────────────────────────────────────
+
     async def broadcast(self, chat_id: str, message):
+        """Send to every WebSocket subscribed to a specific chat room."""
         dead = []
         sockets = list(self.connections.get(chat_id, set()))
         print(f"[broadcast] chat={chat_id} sockets={len(sockets)}")
@@ -62,6 +73,7 @@ class ConnectionManager:
             del self.connections[chat_id]
 
     async def send_to_user(self, user_id: int, payload: dict):
+        """Send a payload to ALL sockets belonging to a user."""
         sockets = list(self.user_connections.get(user_id, set()))
         print(f"[send_to_user] user={user_id} ({type(user_id).__name__}) | all_keys={list(self.user_connections.keys())} | found={len(sockets)}")
         dead = []
@@ -75,6 +87,8 @@ class ConnectionManager:
             self.user_connections[user_id].discard(ws)
         if user_id in self.user_connections and not self.user_connections[user_id]:
             del self.user_connections[user_id]
+
+    # ── high-level event senders ──────────────────────────────────────────────
 
     async def send_new_message(self, data: NewMessageData, member_ids: list[int]):
         print(f"[send_new_message] chat={data.chat_id} members={member_ids}")
@@ -111,6 +125,20 @@ class ConnectionManager:
         }
         for user_id in chat.members:
             await self.send_to_user(user_id, payload)
+
+    async def broadcast_user_status(self, user_id: int, online: bool):
+        """
+        Notify ALL currently connected users about this user's online status.
+        Simple and reliable — every connected user receives the update,
+        and the frontend ignores updates for users not in any open chat.
+        """
+        payload = {
+            "type": "user_status",
+            "data": {"user_id": user_id, "online": online},
+        }
+        for uid in list(self.user_connections.keys()):
+            if uid != user_id:
+                await self.send_to_user(uid, payload)
 
     async def send_typing(self, data: TypingData):
         message = WebSocketMessage(

@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+services/chat-service/.env
 
 # Virtual environments
 .venv

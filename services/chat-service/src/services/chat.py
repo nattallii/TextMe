@@ -164,7 +164,15 @@ class ChatService:
         other_user = member_ids[0]
         members = sorted([user_id, other_user])
 
-        existing = await Chat.find_one(Chat.members == members, Chat.type == "private")
+        # Only reuse a chat that is not deleted AND the current user hasn't hidden it.
+        # "hidden_for" is set when a user "deletes" a private chat from their side —
+        # in that case we must create a fresh chat with no old messages.
+        existing = await Chat.find_one(
+            Chat.members == members,
+            Chat.type == "private",
+            Chat.is_deleted == False,          # noqa: E712 — group chats hard-delete
+            {"hidden_for": {"$ne": user_id}},  # not hidden by current user
+        )
         if existing:
             return existing
 

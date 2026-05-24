@@ -2,6 +2,7 @@ import uuid
 from beanie import Document
 from datetime import datetime, timezone
 from pydantic import Field
+from src.schemas.message import Attachment
 
 class Message(Document):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -19,6 +20,8 @@ class Message(Document):
 
     updated_at: datetime | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    attachments: list[Attachment] = Field(default_factory=list)
 
     class Settings:
         name = "messages"
