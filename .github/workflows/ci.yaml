@@ -13,13 +13,13 @@ jobs:
       matrix:
         service:
           - name: auth
-            context: ./auth-service
+            context: services/auth-service
             image: natalii571/textme-auth-service
           - name: profile
-            context: ./profile-service
+            context: services/profile-service
             image: natalii571/textme-profile-service
           - name: chat
-            context: ./chat-service
+            context: services/chat-service
             image: natalii571/textme-chat-service
 
     steps:
