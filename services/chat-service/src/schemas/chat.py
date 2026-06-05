@@ -23,8 +23,11 @@ class CreateChat(BaseModel):
         return self
 
 
+class UpdateGroupSchema(BaseModel):
+    name: Optional[str] = Field(default=None, max_length=100)
+
+
 class MemberInfo(BaseModel):
-    """Basic public info about a chat member, fetched from the profile service."""
     id: int
     username: Optional[str] = None
     phone: Optional[str] = None
@@ -36,6 +39,7 @@ class ChatOut(BaseModel):
     type: ChatType
     members: list[int]
     name: Optional[str] = None
+    avatar_url: Optional[str] = None
     last_message: Optional[str] = None
     last_message_at: Optional[datetime] = None
     is_deleted: bool
@@ -56,9 +60,6 @@ class RemoveMemberSchema(BaseModel):
 
 class ChatWithUnread(ChatOut):
     unread_count: int
-    # Enriched member data — always present, falls back to id-only if profile
-    # service is unavailable. Allows the frontend to show names/avatars even
-    # for users who are not in the viewer's contact list.
     members_info: list[MemberInfo] = Field(default_factory=list)
 
 

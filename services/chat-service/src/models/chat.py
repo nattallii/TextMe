@@ -27,6 +27,8 @@ class Chat(Document):
     last_message: Optional[str] = None
     last_message_at: Optional[datetime] = None
 
+    avatar_url: str | None = None
+
     hidden_for: list[int] = Field(default_factory=list)
 
     class Settings:

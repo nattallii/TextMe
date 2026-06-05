@@ -1,4 +1,5 @@
 import secrets
+from src.services.email_service import send_password_reset_email
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status
@@ -221,6 +222,7 @@ class UserService:
             refresh_token=refresh_token,
         )
 
+
     async def forgot_password(self, email: str):
         user = await self.user_repo.get_by_email(email)
         if not user:
@@ -234,10 +236,9 @@ class UserService:
             token=token,
             expires_at=datetime.now(UTC) + timedelta(minutes=15),
         )
-
         await self.db.commit()
 
-        print(f"[PASSWORD RESET] Email: {user.email}, token: {token}")
+        await send_password_reset_email(to_email=user.email, token=token)
 
         return {"message": "Password reset token sent"}
 

@@ -44,6 +44,12 @@ class ConnectionManager:
         self.user_chats[user_id].discard(chat_id)
         print(f"[disconnect] chat={chat_id} user={user_id}")
 
+    def is_user_in_chat(self, user_id: int, chat_id: str) -> bool:
+        """Return True if the user has an active WebSocket in this specific chat room."""
+        chat_sockets = self.connections.get(chat_id, set())
+        user_sockets = self.user_connections.get(user_id, set())
+        return bool(chat_sockets & user_sockets)
+
     async def disconnect_user(self, ws: WebSocket, user_id: int):
         self.user_connections[user_id].discard(ws)
         if not self.user_connections[user_id]:

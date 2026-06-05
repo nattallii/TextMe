@@ -83,7 +83,14 @@ class ChatService:
             if member != user_id:
                 if await redis_service.is_online(member):
                     message.delivered_to.append(member)
-                await redis_service.increment_unread(member, chat_id)
+
+                # Check if this member is actively viewing the chat room right now.
+                # If yes — don't increment Redis so reload shows 0.
+                member_in_chat = manager.is_user_in_chat(member, chat_id)
+
+                if not member_in_chat:
+                    await redis_service.increment_unread(member, chat_id)
+
                 count = await redis_service.get_unread(member, chat_id)
                 await manager.send_unread_update(chat_id, member, count)
 
@@ -145,6 +152,101 @@ class ChatService:
             raise HTTPException(404, "Message not found")
         return MessageOut.model_validate(message)
 
+    async def update_group(self, chat_id: str, user_id: int, data):
+        """Rename a group chat. Only admin (created_by) can do this."""
+        chat = await self.chat_repository.get_by_id(chat_id)
+        if not chat:
+            raise HTTPException(404, "Chat not found")
+        if chat.type != "group":
+            raise HTTPException(400, "Not a group chat")
+        if chat.created_by != user_id:
+            raise HTTPException(403, "Only admin can rename the group")
+        if data.name:
+            chat.name = data.name.strip()
+            await chat.save()
+        return chat
+
+    async def update_group_avatar(self, chat_id: str, user_id: int, file):
+        """Upload group avatar directly to MinIO (same as upload service does)."""
+        import uuid, io
+        from src.services.minio import client as minio_client
+
+        chat = await self.chat_repository.get_by_id(chat_id)
+        if not chat:
+            raise HTTPException(404, "Chat not found")
+        if chat.type != "group":
+            raise HTTPException(400, "Not a group chat")
+        if chat.created_by != user_id:
+            raise HTTPException(403, "Only admin can change the avatar")
+
+        ALLOWED = {"image/png", "image/jpeg", "image/webp", "image/gif"}
+        if file.content_type not in ALLOWED:
+            raise HTTPException(400, "Only images are allowed for group avatar")
+
+        file_bytes = await file.read()
+        if len(file_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(400, "File too large (max 10 MB)")
+
+        object_name = f"{uuid.uuid4()}-{file.filename}"
+
+        try:
+            minio_client.put_object(
+                bucket_name="chat-files",
+                object_name=object_name,
+                data=io.BytesIO(file_bytes),
+                length=len(file_bytes),
+                content_type=file.content_type,
+            )
+        except Exception as e:
+            print(f"[update_group_avatar] MinIO error: {e}")
+            raise HTTPException(500, "Failed to upload avatar")
+
+        url = f"http://localhost:9000/chat-files/{object_name}"
+        chat.avatar_url = url
+        await chat.save()
+        return chat
+
+    async def add_member(self, chat_id: str, user_id: int, member_user_id: int):
+        """Add a member to a group chat by user_id. Admin only."""
+        chat = await self.chat_repository.get_by_id(chat_id)
+        if not chat:
+            raise HTTPException(404, "Chat not found")
+        if chat.type != "group":
+            raise HTTPException(400, "Not a group chat")
+        if chat.created_by != user_id:
+            raise HTTPException(403, "Only admin can add members")
+        if member_user_id in chat.members:
+            raise HTTPException(409, "User is already a member")
+
+        chat.members.append(member_user_id)
+        await chat.save()
+
+        # Notify new member via WS
+        await manager.send_new_chat(chat)
+        return chat
+
+    async def remove_member(self, chat_id: str, user_id: int, member_id: int):
+        """Remove a member from a group chat. Admin only."""
+        chat = await self.chat_repository.get_by_id(chat_id)
+        if not chat:
+            raise HTTPException(404, "Chat not found")
+        if chat.type != "group":
+            raise HTTPException(400, "Not a group chat")
+        if chat.created_by != user_id:
+            raise HTTPException(403, "Only admin can remove members")
+        if member_id == chat.created_by:
+            raise HTTPException(400, "Cannot remove the admin")
+        if member_id not in chat.members:
+            raise HTTPException(404, "User is not a member")
+
+        chat.members.remove(member_id)
+        await chat.save()
+
+        # Reset unread for removed member
+        await redis_service.reset_unread(member_id, chat_id)
+
+        return chat
+
     async def delete_chat(self, chat_id: str, user_id: int):
         chat = await self.chat_repository.delete_chat(chat_id, user_id)
         if not chat:
@@ -187,6 +289,10 @@ class ChatService:
         await chat.insert()
         await manager.send_new_chat(chat)
         return chat
+
+    async def mark_chat_read(self, chat_id: str, user_id: int) -> None:
+        """Reset unread counter in Redis. Called when user is actively viewing a chat."""
+        await redis_service.reset_unread(user_id, chat_id)
 
     async def get_history(self, chat_id: str, user_id: int):
         chat = await self.chat_repository.get_by_id(chat_id)
@@ -255,6 +361,7 @@ class ChatService:
             type=chat.type,
             name=chat.name,
             members=chat.members,
+            avatar_url=getattr(chat, "avatar_url", None),
             last_message=chat.last_message,
             last_message_at=chat.last_message_at,
             created_by=chat.created_by,
