@@ -1,0 +1,44 @@
+rabbitmq:
+  replicaCount: 1
+  image:
+    repository: rabbitmq
+    tag: "3-management"
+    pullPolicy: IfNotPresent
+  service:
+    port: 5672
+    managementPort: 15672
+  persistence:
+    accessMode: ReadWriteOnce
+    storageClass: gp2
+    size: 1Gi
+
+redis:
+  replicaCount: 1
+  image:
+    repository: redis
+    tag: "7"
+    pullPolicy: IfNotPresent
+  service:
+    port: 6379
+  persistence:
+    accessMode: ReadWriteOnce
+    storageClass: gp2
+    size: 1Gi
+
+minio:
+  enabled: false
+#  replicaCount: 1
+#  image:
+#    repository: minio/minio
+#    tag: latest
+#    pullPolicy: IfNotPresent
+#  rootUser: admin
+#  rootPassword: password123
+#  defaultBucket: chat-bucket
+#  service:
+#    port: 9000
+#    consolePort: 9001
+#  persistence:
+#    accessMode: ReadWriteOnce
+#    storageClass: standard
+#    size: 5Gi

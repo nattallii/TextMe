@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "infra-chart.redis.fullname" . }}
+spec:
+  serviceName: {{ include "infra-chart.redis.fullname" . }}
+  replicas: {{ .Values.redis.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "infra-chart.redis.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "infra-chart.redis.fullname" . }}
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+          ports:
+            - containerPort: 6379
+          command: ["redis-server", "--appendonly", "yes"]
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-storage
+      spec:
+        accessModes:
+          - {{ .Values.redis.persistence.accessMode }}
+        storageClassName: {{ .Values.redis.persistence.storageClass | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.redis.persistence.size }}

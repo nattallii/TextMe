@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "infra-chart.rabbitmq.fullname" . }}
+spec:
+  serviceName: {{ include "infra-chart.rabbitmq.fullname" . }}
+  replicas: {{ .Values.rabbitmq.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "infra-chart.rabbitmq.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "infra-chart.rabbitmq.fullname" . }}
+    spec:
+      containers:
+        - name: rabbitmq
+          image: "{{ .Values.rabbitmq.image.repository }}:{{ .Values.rabbitmq.image.tag }}"
+          imagePullPolicy: {{ .Values.rabbitmq.image.pullPolicy }}
+          ports:
+            - containerPort: 5672
+              name: amqp
+            - containerPort: 15672
+              name: management
+          volumeMounts:
+            - name: rabbitmq-storage
+              mountPath: /var/lib/rabbitmq
+  volumeClaimTemplates:
+    - metadata:
+        name: rabbitmq-storage
+      spec:
+        accessModes:
+          - {{ .Values.rabbitmq.persistence.accessMode }}
+        storageClassName: {{ .Values.rabbitmq.persistence.storageClass | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.rabbitmq.persistence.size }}

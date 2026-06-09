@@ -1,21 +1,31 @@
 releases:
+  - name: infra
+    namespace: textme
+    chart: ./charts/infra-chart
+
   - name: auth
     namespace: textme
     chart: ./charts/app-chart
     values:
       - ./values/auth-values.yaml
+    needs:
+      - textme/infra
 
   - name: chat
     namespace: textme
     chart: ./charts/app-chart
     values:
       - ./values/chat-values.yaml
+    needs:
+      - textme/infra
 
   - name: profile
     namespace: textme
     chart: ./charts/app-chart
     values:
       - ./values/profile-values.yaml
+    needs:
+      - textme/infra
 
   - name: ingress
     namespace: textme
