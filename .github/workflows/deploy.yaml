@@ -1,70 +1,58 @@
-name: Deploy to EKS
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push auth service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/auth-service
-          push: true
-          tags: natalii571/textme-auth-service:${{ github.sha }}
-
-      - name: Build and push chat service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/chat-service
-          push: true
-          tags: natalii571/textme-chat-service:${{ github.sha }}
-
-      - name: Build and push profile service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/profile-service
-          push: true
-          tags: natalii571/textme-profile-service:${{ github.sha }}
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig \
-            --name ${{ secrets.EKS_CLUSTER_NAME }} \
-            --region ${{ secrets.AWS_REGION }}
-
-      - name: Install helmfile
-        run: |
-          curl -Lo helmfile https://github.com/helmfile/helmfile/releases/latest/download/helmfile_linux_amd64
-          chmod +x helmfile
-          sudo mv helmfile /usr/local/bin/
-          helm plugin install https://github.com/databus23/helm-diff
-
-      - name: Deploy
-        run: |
-          cd k8s
-          helmfile sync \
-            --set auth.image.tag=${{ github.sha }} \
-            --set chat.image.tag=${{ github.sha }} \
-            --set profile.image.tag=${{ github.sha }}
+#name: Deploy to EKS
+#
+#on:
+#  workflow_run:
+#    workflows: ["Build & Push Images"]
+#    types:
+#      - completed
+#  workflow_dispatch:
+#
+#permissions:
+#  id-token: write
+#  contents: read
+#
+#env:
+#  AWS_REGION: eu-central-1
+#  EKS_CLUSTER_NAME: textme-cluster
+#
+#jobs:
+#  deploy:
+#    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Configure AWS credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+#          aws-region: ${{ env.AWS_REGION }}
+#
+#      - name: Update kubeconfig
+#        run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME"
+#
+#      - name: Check cluster access
+#        run: kubectl get nodes
+#
+#      - name: Install Helm
+#        uses: azure/setup-helm@v4
+#        with:
+#          version: v3.18.4
+#
+#      - name: Install Helmfile
+#        run: |
+#          curl -L https://github.com/helmfile/helmfile/releases/download/v0.168.0/helmfile_0.168.0_linux_amd64.tar.gz -o helmfile.tar.gz
+#          tar -xzf helmfile.tar.gz
+#          sudo mv helmfile /usr/local/bin/
+#          helmfile --version
+#
+#      - name: Install Helm diff plugin
+#        run: |
+#          helm plugin list
+#          helm plugin install https://github.com/databus23/helm-diff || true
+#          helm plugin list
+#
+#      - name: Deploy
+#        run: helmfile -f ./k8s/helmfile.yaml apply

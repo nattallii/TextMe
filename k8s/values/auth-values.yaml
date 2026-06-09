@@ -15,14 +15,10 @@ config:
   JWT_ALGORITHM: HS256
   JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "30"
   JWT_REFRESH_TOKEN_EXPIRE_DAYS: "7"
-  RABBITMQ_HOST: infra-rabbitmq
-  RABBITMQ_PORT: "5672"
-  RABBITMQ_USER: guest
 
 secret:
   DATABASE_URL: postgresql+asyncpg://postgres:password@auth-postgres-chart:5432/authDB
   JWT_SECRET_KEY: SUPER_PUPER_SECRET
-  RABBITMQ_PASSWORD: guest
 
 
 database:
