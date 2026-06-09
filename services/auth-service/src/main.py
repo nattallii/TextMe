@@ -26,12 +26,12 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:5174",
+        "http://textme-frontend.s3-website-us-east-1.amazonaws.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app.include_router(v1_router, prefix="/api/v1")
 
 

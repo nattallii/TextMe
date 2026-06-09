@@ -34,14 +34,16 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# Single CORS middleware — no custom middleware needed
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://textme-frontend.s3-website-us-east-1.amazonaws.com",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 app.include_router(chat_router, prefix="/api/v1")
