@@ -9,3 +9,7 @@ services/chat-service/.env
 
 # Virtual environments
 .venv
+
+k8s/values/chat-values.yaml
+k8s/values/profile-values.yaml
+k8s/values/auth-values.yaml
